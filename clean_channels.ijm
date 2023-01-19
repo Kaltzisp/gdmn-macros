@@ -49,8 +49,9 @@ save(path+"channels/endo.tif");
 close("Result of endo");
 
 // Saving intensity image.
-// selectWindow("marker");
-// save(path+"channels/intensity.tif");
+selectWindow("marker");
+save(path+"channels/intensity.tif");
+save(path+"channels/marker.tif");
 
 // Close all.
 close("*");
