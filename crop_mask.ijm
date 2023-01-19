@@ -14,9 +14,7 @@ open(path+"masks/"+mask);
 // Opening compact mask and stacking it on myo.
 for (i = 0; i < selections.length; i++) {
 	open(path+"masks/"+selections[i]);
-	if (selections[i] != "mask_compact.tif") {
-		run("Create Selection");	
-	}
+	run("Create Selection");
 	selectWindow(mask);
 	run("Restore Selection");
 	if (orientation == "reverse") {
