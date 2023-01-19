@@ -118,54 +118,69 @@ Dialog.addCheckbox("Save quantifications", false);
 // Showing dialog.
 Dialog.show();
 
-
-// Getting dialog info.
-split_channels = Dialog.getCheckbox();
-create_myo_masks = Dialog.getCheckbox();
-create_endo_masks = Dialog.getCheckbox();
-create_optional_mask = Dialog.getCheckbox();
-clean_nuclear_channel = Dialog.getCheckbox();
-draw_custom_mask = Dialog.getCheckbox();
-compute_trabecular_mask = Dialog.getCheckbox();
-run_stardist = Dialog.getCheckbox();
-segment_tissues = Dialog.getCheckbox();
-segment_myo = Dialog.getCheckbox();
-create_sublayers = Dialog.getCheckbox();
-trabecular_sublayers = Dialog.getCheckbox();
-endocardial_sublayers = Dialog.getCheckbox();
-perform_thresholding = Dialog.getCheckbox();
-save_output = Dialog.getCheckbox();
-
+// Checking logs directory
 path = Dialog.getString();
-pattern = Dialog.getString();
-channels = Dialog.getString();
-optional_mask = Dialog.getString();
-manual_mask_name = Dialog.getString();
-manual_mask_template = Dialog.getString();
-threshold_values = Dialog.getString();
-threshold_colors = Dialog.getString();
-
-myo_amp = Dialog.getNumber();
-myo_avg = Dialog.getNumber();
-myo_smooth = Dialog.getNumber();
-endo_amp = Dialog.getNumber();
-endo_avg = Dialog.getNumber();
-endo_smooth = Dialog.getNumber();
-optional_amp = Dialog.getNumber();
-optional_avg = Dialog.getNumber();
-optional_smooth = Dialog.getNumber();
-percentile_low = Dialog.getNumber();
-percentile_high = Dialog.getNumber();
-probability = Dialog.getNumber();
-overlap = Dialog.getNumber();
-min_area =  Dialog.getNumber();
-num_sublayers = Dialog.getNumber();
-
-// Confirming analysis.
 path = replace(path, "\\", "/");
 if (path.substring(path.length - 1) != "/") {
 	path = path + "/";
 }
+runMacro("pk/make_folders.ijm", path+",logs");
+getDateAndTime(y,m,d,D,h,m,s,S);
+dvals = newArray(y,m,d,h,m,s);
+for (i=0; i<dvals.length; i++) {
+	if (lengthOf(dvals[i]) == 1) {
+		dvals[i] = "0" + dvals[i];
+	}
+}
+logfile = String.join(dvals, "-");
+f = File.open(path+"logs/"+logfile);
+
+// Getting dialog info.
+split_channels = Dialog.getCheckbox(); print(f, "split_channels=" + split_channels);
+create_myo_masks = Dialog.getCheckbox(); print(f, "create_myo_masks=" + create_myo_masks);
+create_endo_masks = Dialog.getCheckbox(); print(f, "create_endo_masks=" + create_endo_masks);
+create_optional_mask = Dialog.getCheckbox(); print(f, "create_optional_mask=" + create_optional_mask);
+clean_nuclear_channel = Dialog.getCheckbox(); print(f, "clean_nuclear_channel=" + clean_nuclear_channel);
+draw_custom_mask = Dialog.getCheckbox(); print(f, "draw_custom_mask=" + draw_custom_mask);
+compute_trabecular_mask = Dialog.getCheckbox(); print(f, "compute_trabecular_mask=" + compute_trabecular_mask);
+run_stardist = Dialog.getCheckbox(); print(f, "run_stardist=" + run_stardist);
+segment_tissues = Dialog.getCheckbox(); print(f, "segment_tissues=" + segment_tissues);
+segment_myo = Dialog.getCheckbox(); print(f, "segment_myo=" + segment_myo);
+create_sublayers = Dialog.getCheckbox(); print(f, "create_sublayers=" + create_sublayers);
+trabecular_sublayers = Dialog.getCheckbox(); print(f, "trabecular_sublayers=" + trabecular_sublayers);
+endocardial_sublayers = Dialog.getCheckbox(); print(f, "endocardial_sublayers=" + endocardial_sublayers);
+perform_thresholding = Dialog.getCheckbox(); print(f, "perform_thresholding=" + perform_thresholding);
+save_output = Dialog.getCheckbox(); print(f, "save_output=" + save_output);
+
+print(f, "path= " + path);
+pattern = Dialog.getString(); print(f, "pattern=" + pattern);
+channels = Dialog.getString(); print(f, "channels=" + channels);
+optional_mask = Dialog.getString(); print(f, "optional_mask=" + optional_mask);
+manual_mask_name = Dialog.getString(); print(f, "manual_mask_name=" + manual_mask_name);
+manual_mask_template = Dialog.getString(); print(f, "manual_mask_template=" + manual_mask_template);
+threshold_values = Dialog.getString(); print(f, "threshold_values=" + threshold_values);
+threshold_colors = Dialog.getString(); print(f, "threshold_colors=" + threshold_colors);
+
+myo_amp = Dialog.getNumber(); print(f, "myo_amp=" + myo_amp);
+myo_avg = Dialog.getNumber(); print(f, "myo_avg=" + myo_avg);
+myo_smooth = Dialog.getNumber(); print(f, "myo_smooth=" + myo_smooth);
+endo_amp = Dialog.getNumber(); print(f, "endo_amp=" + endo_amp);
+endo_avg = Dialog.getNumber(); print(f, "endo_avg=" + endo_avg);
+endo_smooth = Dialog.getNumber(); print(f, "endo_smooth=" + endo_smooth);
+optional_amp = Dialog.getNumber(); print(f, "optional_amp=" + optional_amp);
+optional_avg = Dialog.getNumber(); print(f, "optional_avg=" + optional_avg);
+optional_smooth = Dialog.getNumber(); print(f, "optional_smooth=" + optional_smooth);
+percentile_low = Dialog.getNumber(); print(f, "percentile_low=" + percentile_low);
+percentile_high = Dialog.getNumber(); print(f, "percentile_high=" + percentile_high);
+probability = Dialog.getNumber(); print(f, "probability=" + probability);
+overlap = Dialog.getNumber(); print(f, "overlap=" + overlap);
+min_area = Dialog.getNumber(); print(f, "min_area=" + min_area);
+num_sublayers = Dialog.getNumber(); print(f, "num_sublayers=" + num_sublayers);
+
+// Closing logfile.
+File.close(f);
+
+// Confirming analysis.
 pattern = replace(pattern, "*", ".*");
 var count = 0;
 function batchRun(d,p) {
@@ -269,18 +284,3 @@ if (perform_thresholding) {
 if (save_output) {
 	runMacro("pk/get_areas.ijm", path);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
