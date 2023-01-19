@@ -1,4 +1,4 @@
-// Angular_V2.2: Peter Kaltzis - 15th December 2022.
+// Angular_V2.2: Peter Kaltzis - 19th January 2022.
 // Config.
 close("*");
 close("ROI Manager");
@@ -48,8 +48,8 @@ if (runStack) {
 	run("Analyze Particles...", "size="+min_size+"-Infinity add stack");
 	for (i = 0; i < roiManager("count"); i++) {
 		roiManager("select", i);
-		x = getValue("X");
-		y = getValue("Y");
+		x = round(getValue("X"));
+		y = round(getValue("Y"));
 		if (getValue(x,y) == 255) {
 			idx += 1;
 			setColor(255 - idx);
@@ -58,8 +58,8 @@ if (runStack) {
 				setSlice(getSliceNumber() + 1);
 				if (getValue(x,y) != 0) {
 					doWand(x, y);
-					x = getValue("X");
-					y = getValue("Y");
+					x = round(getValue("X"));
+					y = round(getValue("Y"));
 					floodFill(x, y);
 				}
 			}
