@@ -5,5 +5,7 @@ folders = split(input[1],"-");
 
 // Making folders.
 for(i=0; i<folders.length; i++) {
-	File.makeDirectory(path+folders[i]+"/");
+	if (File.exists(path+folders[i]) == 0) {
+		File.makeDirectory(path+folders[i]+"/");
+	}
 }
