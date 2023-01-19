@@ -12,7 +12,7 @@ colors = split(input[3], "-");
 thresholds = newArray(layers.length+1);
 thresholds[0] = 0;
 for (i=1; i<thresholds.length; i++) {
-	thresholds[i] = parseFloat(layers[i-1])*255;
+	thresholds[i] = parseFloat(layers[i-1])*255*0.01;
 }
 
 // Preparing output array.
