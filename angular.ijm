@@ -1,4 +1,4 @@
-// Angular_V2.2: Peter Kaltzis - 19th January 2022.
+// Angular_V2.2: Peter Kaltzis - 23rd January 2023.
 // Config.
 close("*");
 close("ROI Manager");
