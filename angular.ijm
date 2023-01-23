@@ -58,9 +58,9 @@ if (runStack) {
 				setSlice(getSliceNumber() + 1);
 				if (getValue(x,y) != 0) {
 					doWand(x, y);
+					fill();
 					x = round(getValue("X"));
 					y = round(getValue("Y"));
-					floodFill(x, y);
 				}
 			}
 		}
@@ -76,8 +76,11 @@ if (runStack) {
 }
 
 if (runSkeleton) {
+	setForegroundColor(255, 255, 255);
+	setBackgroundColor(0, 0, 0);
 	// Creating skeletons.
 	open(path+"endo.tif");
+	run("Median...", "radius=10 stack");
 	run("Skeletonize", "stack");
 	
 	// Manually selecting luminal areas.
@@ -140,7 +143,7 @@ if (runAngle) {
 	lengths = newArray(m);
 	selectWindow("nuclei");
 	for(j=0; j<m; j++) {
-		
+
 		// Selecting cell roi.
 		roiManager("select", j);
 		slice = getSliceNumber();
@@ -155,10 +158,10 @@ if (runAngle) {
 		selectWindow("nuclei");
 		roiManager("select", j);
 		
-		// Getting centroid.
+		// Getting centroid and index.
 		x = getValue("X");
 		y = getValue("Y");
-		idx = 255 - getValue(x,y);
+		idx = 255 - getValue("Mean");
 		
 		// Measuring point A.
 		Ax = getValue("FeretX");
