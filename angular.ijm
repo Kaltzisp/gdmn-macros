@@ -161,7 +161,7 @@ if (runAngle) {
 		// Getting centroid and index.
 		x = getValue("X");
 		y = getValue("Y");
-		idx = 255 - getValue("Mean");
+		idx = 255 - getValue("Mode");
 		
 		// Measuring point A.
 		Ax = getValue("FeretX");
