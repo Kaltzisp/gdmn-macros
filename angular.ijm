@@ -11,6 +11,7 @@ setOption("BlackBackground", true);
 Dialog.createNonBlocking("Angular Macro v2");
 Dialog.addString("Path", "path-to-files", 30);
 Dialog.addNumber("Minimum cell size", 50);
+Dialog.addNumber("Endocardial smoothing", 5);
 Dialog.addChoice("Label cells", newArray("Cell #", "ROI #", "Both"));
 Dialog.addCheckbox("Connect z-stack", true);
 Dialog.addCheckbox("Generate skeletons", true);
@@ -20,6 +21,7 @@ Dialog.show();
 // Getting dialog options.
 path = Dialog.getString();
 min_size = Dialog.getNumber();
+smoothing = Dialog.getNumber();
 label = Dialog.getChoice();
 runStack = Dialog.getCheckbox();
 runSkeleton = Dialog.getCheckbox();
@@ -80,7 +82,9 @@ if (runSkeleton) {
 	setBackgroundColor(0, 0, 0);
 	// Creating skeletons.
 	open(path+"endo.tif");
-	run("Median...", "radius=10 stack");
+	if (smoothing > 0) {
+		run("Median...", "radius="+smoothing+" stack");
+	}
 	run("Skeletonize", "stack");
 	
 	// Manually selecting luminal areas.
