@@ -19,3 +19,4 @@ for (i=0; i<dirHierarchy.length; i++) {
 
 // Moving file.
 File.copy(path+file+".tif", dir+"/"+file+".tif");
+File.delete(path+file+".tif");
