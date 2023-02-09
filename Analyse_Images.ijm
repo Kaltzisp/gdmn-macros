@@ -15,6 +15,7 @@ Dialog.addString("Path to images:", "copy_path_here", 100);
 Dialog.addString("Image file pattern:", "roi.tif");
 Dialog.addToSameRow();
 Dialog.addMessage("The asterisk * is a wildcard - e.g. Image*roi.tif will match Image_01_roi.tif, Image_02_roi.tif, etc.", 12, blue);
+Dialog.addCheckbox("Create folder hierarchy?      [DO NOT RUN WITH OTHER OPTIONS]", false);
 
 // Image analysis methods.
 Dialog.addMessage("Select all methods to apply:", 15, red);
@@ -136,6 +137,7 @@ logfile = String.join(dvals, "-");
 f = File.open(path+"logs/"+logfile);
 
 // Getting dialog info.
+folder_hierarchy = Dialog.getCheckbox(); print(f, "folder_hierarchy=" + folder_hierarchy);
 split_channels = Dialog.getCheckbox(); print(f, "split_channels=" + split_channels);
 create_myo_masks = Dialog.getCheckbox(); print(f, "create_myo_masks=" + create_myo_masks);
 create_endo_masks = Dialog.getCheckbox(); print(f, "create_endo_masks=" + create_endo_masks);
@@ -182,105 +184,119 @@ File.close(f);
 
 // Confirming analysis.
 pattern = replace(pattern, "*", ".*");
-var count = 0;
-function batchRun(d,p) {
-	a=getFileList(d);
-	for(i=0;i<a.length;i++) {
-		t=a[i];
-		u=d+t;
-		if(File.isDirectory(u)) {
-			batchRun(u,p);
-		} else if(matches(t,p)) {
-				count = count + 1;
+var runOn = newArray();
+function batchRun(dir, rgx) {
+	fileArray = getFileList(dir);
+	for(i=0; i<fileArray.length; i++) {
+		thisFile = fileArray[i];
+		filePath = dir + thisFile;
+		if(File.isDirectory(filePath)) {
+			batchRun(filePath, rgx);
+		} else if(matches(thisFile, rgx)) {
+				runOn[runOn.length] = filePath;
 		}
 	}
-};
+}
 batchRun(path, pattern);
 Dialog.create("Confirm Analysis?");
 Dialog.addMessage("Preparing to run in folder:", 12, black);
 Dialog.addMessage(path, 12, blue);
 Dialog.addMessage("On ALL files matching the pattern:", 12, black);
 Dialog.addMessage(pattern, 12, blue);
-Dialog.addMessage("The macro has identified: "+count+" images which match these criteria", 20, green);
+Dialog.addMessage("The macro has identified: "+runOn.length+" images which match these criteria", 20, green);
 Dialog.addMessage("WARNING: IF YOU PROCEED, PREVIOUS QUANTIFICATIONS AND LABELS WILL BE OVERWRITTEN.", 12, red);
 Dialog.show();
 
-// Check folder integrity and that all the prerequisite folders exist.
-runMacro("pk/make_folders.ijm", path+",channels-labels-marker-masks-zips");
-
-
-// Running macros based on input.
-if (split_channels) {
-	runMacro("pk/clean_channels.ijm", path+",roi,"+channels);
-}
-if (create_myo_masks) {
-	runMacro("pk/create_masks.ijm", path+",myo,"+myo_amp+","+myo_avg+","+myo_smooth+",myo");
-	runMacro("pk/create_masks.ijm", path+",myo,"+(myo_amp/2)+","+(myo_avg/2)+","+(myo_smooth/2)+",myo_low");
-}
-if (create_endo_masks) {
-	runMacro("pk/create_masks.ijm", path+",endo,"+endo_amp+","+endo_avg+","+endo_smooth+",endo");
-	runMacro("pk/create_masks.ijm", path+",endo,"+(endo_amp/2)+","+(endo_avg/2)+","+(endo_smooth/2)+",endo_low");
-}
-if (create_optional_mask) {
-	runMacro("pk/create_masks.ijm", path+","+optional_mask+","+optional_amp+","+optional_avg+","+optional_smooth+","+optional_mask);
-}
-if (clean_nuclear_channel) {
-	runMacro("pk/filter_noise.ijm", path+",myo_low-endo_low,4,nuclei");
-}
-if (draw_custom_mask) {
-	runMacro("pk/custom_mask.ijm", path+","+manual_mask_name+","+manual_mask_template);
-	if (manual_mask_name == "myo_compact") {
-		runMacro("pk/crop_mask.ijm", path+",mask_myo.tif,mask_myo_compact.tif,mask_myo_compact.tif,normal");
+// Running macro iteratively.
+for (i=0; i<runOn.length; i++) {
+	// Getting path and file.
+	path = split(runOn[i], "/");
+	fileName = path[path.length - 1];
+	path = String.join(Array.trim(path, path.length - 1), "/") + "/";
+	
+	if (folder_hierarchy) {
+		// Create folder hierarchy.
+		runMacro("pk/create_hierarchy.ijm", path+","+fileName);
+	} else {
+		// Check folder integrity and that all the prerequisite folders exist.
+		runMacro("pk/make_folders.ijm", path+",channels-labels-marker-masks-zips");
 	}
-}
-if (compute_trabecular_mask) {
-	runMacro("pk/crop_mask.ijm", path+",mask_myo.tif,mask_myo_compact.tif,mask_myo_trabecular.tif,reverse");
-}
-if (run_stardist) {
-	runMacro("pk/stardist.ijm", path+",nuclei_clean,"+percentile_low+","+percentile_high+","+probability+","+overlap+","+min_area+",roi");
-}
-if (segment_tissues) {
-	runMacro("pk/segment.ijm", path+",label_roi.tif,list_roi.zip,mask_myo.tif,myo,endo");
-}
-if (segment_myo) {
-	runMacro("pk/segment.ijm", path+",label_myo.tif,list_myo.zip,mask_myo_compact.tif,myo_compact,myo_trabecular");
-}
-if (create_sublayers) {
-	if (num_sublayers == 2) {
-		if (trabecular_sublayers) {
-			runMacro("pk/into_layers.ijm", path+",label_myo_trabecular.tif,mask_myo_compact.tif,0.95,myo_trabecular2_base-myo_trabecular2_apex");
-			runMacro("pk/segment.ijm", path+",label_myo_trabecular.tif,list_myo_trabecular.zip,mask_myo_trabecular2_base.tif,myo_trabecular2_base,myo_trabecular2_apex");
-			runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular2_base.tif,mask_myo_trabecular2_base.tif,normal");
-			runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular2_base.tif,mask_myo_trabecular2_apex.tif,reverse");
-		}
-		if (endocardial_sublayers) {
-			runMacro("pk/into_layers.ijm", path+",label_endo.tif,mask_myo_compact.tif,0.95,endo2_base-endo2_apex");
-			runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_endo2_base.tif,endo2_base,endo2_apex");
-			runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo2_base.tif,mask_endo2_base.tif,normal");
-			runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo2_base.tif,mask_endo2_apex.tif,reverse");
-		}
-	} else if (num_sublayers == 3) {
-		if (trabecular_sublayers) {
-			runMacro("pk/into_layers.ijm", path+",label_myo_trabecular.tif,mask_myo_compact.tif,0.95,myo_trabecular_base-myo_trabecular_middle-myo_trabecular_apex");
-			runMacro("pk/segment.ijm", path+",label_myo_trabecular.tif,list_myo_trabecular.zip,mask_myo_trabecular_base.tif,myo_trabecular_base,myo_trabecular_middle_apex");
-			runMacro("pk/segment.ijm", path+",label_myo_trabecular_middle_apex.tif,list_myo_trabecular_middle_apex.zip,mask_myo_trabecular_middle.tif,myo_trabecular_middle,myo_trabecular_apex");
-			runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular_base.tif,mask_myo_trabecular_base.tif,normal");
-			runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular_middle.tif,mask_myo_trabecular_middle.tif,normal");
-			runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular_base.tif-mask_myo_trabecular_middle.tif,mask_myo_trabecular_apex.tif,reverse");
-		}
-		if (endocardial_sublayers) {
-			runMacro("pk/into_layers.ijm", path+",label_endo.tif,mask_myo_compact.tif,0.95,endo_base-endo_middle-endo_apex");
-			runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_endo_base.tif,endo_base,endo_middle_apex");
-			runMacro("pk/segment.ijm", path+",label_endo_middle_apex.tif,list_endo_middle_apex.zip,mask_endo_middle.tif,endo_middle,endo_apex");
-			runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo_base.tif,mask_endo_base.tif,normal");
-			runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo_middle.tif,mask_endo_middle.tif,normal");
-			runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo_base.tif-mask_endo_middle.tif,mask_endo_apex.tif,reverse");
+	
+	// Running macros based on input.
+	if (split_channels) {
+		runMacro("pk/clean_channels.ijm", path+",roi,"+channels);
+	}
+	if (create_myo_masks) {
+		runMacro("pk/create_masks.ijm", path+",myo,"+myo_amp+","+myo_avg+","+myo_smooth+",myo");
+		runMacro("pk/create_masks.ijm", path+",myo,"+(myo_amp/2)+","+(myo_avg/2)+","+(myo_smooth/2)+",myo_low");
+	}
+	if (create_endo_masks) {
+		runMacro("pk/create_masks.ijm", path+",endo,"+endo_amp+","+endo_avg+","+endo_smooth+",endo");
+		runMacro("pk/create_masks.ijm", path+",endo,"+(endo_amp/2)+","+(endo_avg/2)+","+(endo_smooth/2)+",endo_low");
+	}
+	if (create_optional_mask) {
+		runMacro("pk/create_masks.ijm", path+","+optional_mask+","+optional_amp+","+optional_avg+","+optional_smooth+","+optional_mask);
+	}
+	if (clean_nuclear_channel) {
+		runMacro("pk/filter_noise.ijm", path+",myo_low-endo_low,4,nuclei");
+	}
+	if (draw_custom_mask) {
+		runMacro("pk/custom_mask.ijm", path+","+manual_mask_name+","+manual_mask_template);
+		if (manual_mask_name == "myo_compact") {
+			runMacro("pk/crop_mask.ijm", path+",mask_myo.tif,mask_myo_compact.tif,mask_myo_compact.tif,normal");
 		}
 	}
+	if (compute_trabecular_mask) {
+		runMacro("pk/crop_mask.ijm", path+",mask_myo.tif,mask_myo_compact.tif,mask_myo_trabecular.tif,reverse");
+	}
+	if (run_stardist) {
+		runMacro("pk/stardist.ijm", path+",nuclei_clean,"+percentile_low+","+percentile_high+","+probability+","+overlap+","+min_area+",roi");
+	}
+	if (segment_tissues) {
+		runMacro("pk/segment.ijm", path+",label_roi.tif,list_roi.zip,mask_myo.tif,myo,endo");
+	}
+	if (segment_myo) {
+		runMacro("pk/segment.ijm", path+",label_myo.tif,list_myo.zip,mask_myo_compact.tif,myo_compact,myo_trabecular");
+	}
+	if (create_sublayers) {
+		if (num_sublayers == 2) {
+			if (trabecular_sublayers) {
+				runMacro("pk/into_layers.ijm", path+",label_myo_trabecular.tif,mask_myo_compact.tif,0.95,myo_trabecular2_base-myo_trabecular2_apex");
+				runMacro("pk/segment.ijm", path+",label_myo_trabecular.tif,list_myo_trabecular.zip,mask_myo_trabecular2_base.tif,myo_trabecular2_base,myo_trabecular2_apex");
+				runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular2_base.tif,mask_myo_trabecular2_base.tif,normal");
+				runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular2_base.tif,mask_myo_trabecular2_apex.tif,reverse");
+			}
+			if (endocardial_sublayers) {
+				runMacro("pk/into_layers.ijm", path+",label_endo.tif,mask_myo_compact.tif,0.95,endo2_base-endo2_apex");
+				runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_endo2_base.tif,endo2_base,endo2_apex");
+				runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo2_base.tif,mask_endo2_base.tif,normal");
+				runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo2_base.tif,mask_endo2_apex.tif,reverse");
+			}
+		} else if (num_sublayers == 3) {
+			if (trabecular_sublayers) {
+				runMacro("pk/into_layers.ijm", path+",label_myo_trabecular.tif,mask_myo_compact.tif,0.95,myo_trabecular_base-myo_trabecular_middle-myo_trabecular_apex");
+				runMacro("pk/segment.ijm", path+",label_myo_trabecular.tif,list_myo_trabecular.zip,mask_myo_trabecular_base.tif,myo_trabecular_base,myo_trabecular_middle_apex");
+				runMacro("pk/segment.ijm", path+",label_myo_trabecular_middle_apex.tif,list_myo_trabecular_middle_apex.zip,mask_myo_trabecular_middle.tif,myo_trabecular_middle,myo_trabecular_apex");
+				runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular_base.tif,mask_myo_trabecular_base.tif,normal");
+				runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular_middle.tif,mask_myo_trabecular_middle.tif,normal");
+				runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular_base.tif-mask_myo_trabecular_middle.tif,mask_myo_trabecular_apex.tif,reverse");
+			}
+			if (endocardial_sublayers) {
+				runMacro("pk/into_layers.ijm", path+",label_endo.tif,mask_myo_compact.tif,0.95,endo_base-endo_middle-endo_apex");
+				runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_endo_base.tif,endo_base,endo_middle_apex");
+				runMacro("pk/segment.ijm", path+",label_endo_middle_apex.tif,list_endo_middle_apex.zip,mask_endo_middle.tif,endo_middle,endo_apex");
+				runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo_base.tif,mask_endo_base.tif,normal");
+				runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo_middle.tif,mask_endo_middle.tif,normal");
+				runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo_base.tif-mask_endo_middle.tif,mask_endo_apex.tif,reverse");
+			}
+		}
+	}
+	if (perform_thresholding) {
+		runMacro("pk/map_activities.ijm", path+",intensity.tif,"+threshold_values+","+threshold_colors);
+	}
+	if (save_output) {
+		runMacro("pk/get_areas.ijm", path);
+	}
+
 }
-if (perform_thresholding) {
-	runMacro("pk/map_activities.ijm", path+",intensity.tif,"+threshold_values+","+threshold_colors);
-}
-if (save_output) {
-	runMacro("pk/get_areas.ijm", path);
-}
+
