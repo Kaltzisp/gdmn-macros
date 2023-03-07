@@ -123,12 +123,22 @@ Dialog.addCheckbox("Save quantifications", false);
 // Showing dialog.
 Dialog.show();
 
-// Checking logs directory
+// Sanitizing path for OSes.
 path = Dialog.getString();
 path = replace(path, "\\", "/");
 if (path.substring(path.length - 1) != "/") {
 	path = path + "/";
 }
+OS = getInfo("os.name");
+if (OS == "Windows") {
+	// Pass.
+} else if (OS == "Linux") {
+	path = "/" + path;
+} else if (OS == "Mac OS X") {
+	path = "/" + path;
+}
+
+// Checking logs directory
 runMacro("pk/make_folders.ijm", path+",logs");
 getDateAndTime(y,m,d,D,H,M,S,MS);
 dvals = newArray(y,m,d,H,M,S);
