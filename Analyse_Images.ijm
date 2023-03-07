@@ -130,8 +130,8 @@ if (path.substring(path.length - 1) != "/") {
 	path = path + "/";
 }
 runMacro("pk/make_folders.ijm", path+",logs");
-getDateAndTime(y,m,d,D,h,m,s,S);
-dvals = newArray(y,m,d,h,m,s);
+getDateAndTime(y,m,d,D,H,M,S,MS);
+dvals = newArray(y,m,d,H,M,S);
 for (i=0; i<dvals.length; i++) {
 	if (lengthOf(dvals[i]) == 1) {
 		dvals[i] = "0" + dvals[i];
