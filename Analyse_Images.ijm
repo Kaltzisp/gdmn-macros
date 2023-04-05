@@ -150,8 +150,8 @@ File.saveString(path, tmp+"FIJI_PATH");
 
 // Checking logs directory.
 runMacro("pk/make_folders.ijm", path+",logs");
-getDateAndTime(y,m,d,D,h,m,s,S);
-dvals = newArray(y,m,d,h,m,s);
+getDateAndTime(y,m,d,D,H,M,S,MS);
+dvals = newArray(y,m,d,H,M,S);
 for (i=0; i<dvals.length; i++) {
 	if (lengthOf(dvals[i]) == 1) {
 		dvals[i] = "0" + dvals[i];
@@ -238,6 +238,16 @@ for (i=0; i<runOn.length; i++) {
 	path = split(runOn[i], "/");
 	fileName = path[path.length - 1];
 	path = String.join(Array.trim(path, path.length - 1), "/") + "/";
+	
+	// Path sanitization for OSes.
+	OS = getInfo("os.name");
+	if (OS == "Windows") {
+		// Pass.
+	} else if (OS == "Linux") {
+		path = "/" + path;
+	} else if (OS == "Mac OS X") {
+		path = "/" + path;
+	}
 	
 	if (folder_hierarchy) {
 		// Create folder hierarchy.
