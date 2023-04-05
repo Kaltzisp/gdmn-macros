@@ -10,8 +10,10 @@ waitForUser("Select ROI then hit OK.");
 
 // Duplicating roi.
 run("Duplicate...", "title=roi duplicate");
-run("Clear Outside", "stack");
-run("Select None");
+if (selectionType()>-1) {
+	run("Clear Outside", "stack");
+	run("Select None");
+}
 
 // Running grays and saving.
 for (i = 1; i <= nSlices; i++) {
