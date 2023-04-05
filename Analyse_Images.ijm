@@ -127,6 +127,7 @@ Dialog.addString("Intensity threshold(s):", 30);
 Dialog.addToSameRow();
 Dialog.addToSameRow();
 Dialog.addString("%         Threshold colors:", "blue-red");
+Dialog.addCheckbox("Generate QC files", false);
 Dialog.addCheckbox("Save quantifications", false);
 
 // Showing dialog.
@@ -178,7 +179,9 @@ create_sublayers = Dialog.getCheckbox(); print(f, "create_sublayers=" + create_s
 trabecular_sublayers = Dialog.getCheckbox(); print(f, "trabecular_sublayers=" + trabecular_sublayers);
 endocardial_sublayers = Dialog.getCheckbox(); print(f, "endocardial_sublayers=" + endocardial_sublayers);
 perform_thresholding = Dialog.getCheckbox(); print(f, "perform_thresholding=" + perform_thresholding);
+generate_qc = Dialog.getCheckbox(); print(f, "generate_qc=" + generate_qc);
 save_output = Dialog.getCheckbox(); print(f, "save_output=" + save_output);
+
 
 pattern = Dialog.getString(); print(f, "pattern=" + pattern);
 channels = Dialog.getString(); print(f, "channels=" + channels);
@@ -336,9 +339,14 @@ for (i=0; i<runOn.length; i++) {
 		if (perform_thresholding) {
 			runMacro("pk/map_activities.ijm", path+",intensity.tif,"+threshold_values+","+threshold_colors);
 		}
+		if (generate_qc) {
+			runMacro("pk/quality_check.ijm", path);
+		}
+
 		if (save_output) {
 			runMacro("pk/get_areas.ijm", path);
 		}
+
 	}
 }
 
