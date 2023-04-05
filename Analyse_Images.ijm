@@ -4,6 +4,14 @@ red = "#ff0000";
 green = "#00bb00";
 blue = "#0000ff";
 
+// Checking previous path.
+var defaultPath = "copy_path_here";
+tmp = getDirectory("temp");
+if (File.exists(tmp+"FIJI_PATH")) {
+	defaultPath = File.openAsRawString(tmp+"FIJI_PATH");
+}
+
+
 // Dialog info.
 Dialog.createNonBlocking("GdMN Macro Tool");
 Dialog.addHelp("https://www.google.com/search?q=I+haven%27t+coded+a+help+function+yet.+Ask+Peter+for+help.");
@@ -11,7 +19,7 @@ Dialog.addMessage("Fiji Analysis Tool for GdMN lab - V1.0", 20, black);
 Dialog.addMessage("Created by Peter Kaltzis", 11, "#000055");
 
 // Path and file pattern.
-Dialog.addString("Path to images:", "copy_path_here", 100);
+Dialog.addString("Path to images:", defaultPath, 100);
 Dialog.addString("Image file pattern:", "roi.tif");
 Dialog.addToSameRow();
 Dialog.addMessage("The asterisk * is a wildcard - e.g. Image*roi.tif will match Image_01_roi.tif, Image_02_roi.tif, etc.", 12, blue);
@@ -185,6 +193,11 @@ min_area = Dialog.getNumber(); print(f, "min_area=" + min_area);
 num_sublayers = Dialog.getNumber(); print(f, "num_sublayers=" + num_sublayers);
 
 // Closing logfile.
+File.close(f);
+
+// Saving path.
+f = File.open(tmp+"FIJI_PATH");
+print(f, path);
 File.close(f);
 
 // Confirming analysis.
