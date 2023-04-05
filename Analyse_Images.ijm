@@ -11,7 +11,6 @@ if (File.exists(tmp+"FIJI_PATH")) {
 	defaultPath = File.openAsRawString(tmp+"FIJI_PATH");
 }
 
-
 // Dialog info.
 Dialog.createNonBlocking("GdMN Macro Tool");
 Dialog.addHelp("https://www.google.com/search?q=I+haven%27t+coded+a+help+function+yet.+Ask+Peter+for+help.");
@@ -19,7 +18,9 @@ Dialog.addMessage("Fiji Analysis Tool for GdMN lab - V1.0", 20, black);
 Dialog.addMessage("Created by Peter Kaltzis", 11, "#000055");
 
 // Path and file pattern.
+Dialog.addCheckbox("Browse for folder...", false);
 Dialog.addString("Path to images:", defaultPath, 100);
+
 Dialog.addString("Image file pattern:", "roi.tif");
 Dialog.addToSameRow();
 Dialog.addMessage("The asterisk * is a wildcard - e.g. Image*roi.tif will match Image_01_roi.tif, Image_02_roi.tif, etc.", 12, blue);
@@ -131,12 +132,23 @@ Dialog.addCheckbox("Save quantifications", false);
 // Showing dialog.
 Dialog.show();
 
-// Checking logs directory
+// Fixing path.
 path = Dialog.getString();
 path = replace(path, "\\", "/");
 if (path.substring(path.length - 1) != "/") {
 	path = path + "/";
 }
+
+// Checking path directory.
+browse = Dialog.getCheckbox();
+if (browse) {
+	path = getDirectory("Select a directory.");
+}
+
+// Saving path.
+File.saveString(path, tmp+"FIJI_PATH");
+
+// Checking logs directory.
 runMacro("pk/make_folders.ijm", path+",logs");
 getDateAndTime(y,m,d,D,h,m,s,S);
 dvals = newArray(y,m,d,h,m,s);
@@ -149,6 +161,7 @@ logfile = String.join(dvals, "-");
 f = File.open(path+"logs/"+logfile);
 
 // Getting dialog info.
+print(f, "path= " + path);
 folder_hierarchy = Dialog.getCheckbox(); print(f, "folder_hierarchy=" + folder_hierarchy);
 select_rois = Dialog.getCheckbox(); print(f, "select_rois=" + select_rois);
 split_channels = Dialog.getCheckbox(); print(f, "split_channels=" + split_channels);
@@ -167,7 +180,6 @@ endocardial_sublayers = Dialog.getCheckbox(); print(f, "endocardial_sublayers=" 
 perform_thresholding = Dialog.getCheckbox(); print(f, "perform_thresholding=" + perform_thresholding);
 save_output = Dialog.getCheckbox(); print(f, "save_output=" + save_output);
 
-print(f, "path= " + path);
 pattern = Dialog.getString(); print(f, "pattern=" + pattern);
 channels = Dialog.getString(); print(f, "channels=" + channels);
 optional_mask = Dialog.getString(); print(f, "optional_mask=" + optional_mask);
@@ -193,11 +205,6 @@ min_area = Dialog.getNumber(); print(f, "min_area=" + min_area);
 num_sublayers = Dialog.getNumber(); print(f, "num_sublayers=" + num_sublayers);
 
 // Closing logfile.
-File.close(f);
-
-// Saving path.
-f = File.open(tmp+"FIJI_PATH");
-print(f, path);
 File.close(f);
 
 // Confirming analysis.
