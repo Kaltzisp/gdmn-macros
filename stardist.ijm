@@ -22,7 +22,7 @@ input = split(input, ",");
 
 // Getting variables and opening files.
 path = input[0];
-inFile = input[1]+".tif";
+inFile = input[1];
 min_area = input[6];
 outFile = input[7];
 open(path+"channels/"+inFile);
