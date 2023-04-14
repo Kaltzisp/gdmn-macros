@@ -121,14 +121,14 @@ Dialog.addCheckbox("Endocardium", true);
 Dialog.addMessage("");
 
 // Marker thresholding and quantification.
-Dialog.addCheckbox("Threshold marker", false);
+Dialog.addCheckbox("Threshold marker & quantify", false);
 Dialog.addToSameRow();
 Dialog.addString("Intensity threshold(s):", 30);
 Dialog.addToSameRow();
 Dialog.addToSameRow();
 Dialog.addString("%         Threshold colors:", "blue-red");
+Dialog.addCheckbox("Calculate area quantifications", false);
 Dialog.addCheckbox("Generate QC files", false);
-Dialog.addCheckbox("Save quantifications", false);
 
 // Showing dialog.
 Dialog.show();
@@ -179,8 +179,8 @@ create_sublayers = Dialog.getCheckbox(); print(f, "create_sublayers=" + create_s
 trabecular_sublayers = Dialog.getCheckbox(); print(f, "trabecular_sublayers=" + trabecular_sublayers);
 endocardial_sublayers = Dialog.getCheckbox(); print(f, "endocardial_sublayers=" + endocardial_sublayers);
 perform_thresholding = Dialog.getCheckbox(); print(f, "perform_thresholding=" + perform_thresholding);
+get_areas = Dialog.getCheckbox(); print(f, "get_areas=" + get_areas);
 generate_qc = Dialog.getCheckbox(); print(f, "generate_qc=" + generate_qc);
-save_output = Dialog.getCheckbox(); print(f, "save_output=" + save_output);
 
 
 pattern = Dialog.getString(); print(f, "pattern=" + pattern);
@@ -322,6 +322,9 @@ for (i=0; i<runOn.length; i++) {
 					runMacro("pk/into_layers.ijm", path+",label_myo_trabecular.tif,mask_myo_compact.tif,0.95,myo_trabecular_base-myo_trabecular_middle-myo_trabecular_apex");
 					runMacro("pk/segment.ijm", path+",label_myo_trabecular.tif,list_myo_trabecular.zip,mask_myo_trabecular_base.tif,myo_trabecular_base,myo_trabecular_middle_apex");
 					runMacro("pk/segment.ijm", path+",label_myo_trabecular_middle_apex.tif,list_myo_trabecular_middle_apex.zip,mask_myo_trabecular_middle.tif,myo_trabecular_middle,myo_trabecular_apex");
+					File.delete(path+"labels/label_myo_trabecular_middle_apex.tif");
+					File.delete(path+"zips/list_myo_trabecular_middle_apex.zip");
+					close("Log");
 					runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular_base.tif,mask_myo_trabecular_base.tif,normal");
 					runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular_middle.tif,mask_myo_trabecular_middle.tif,normal");
 					runMacro("pk/crop_mask.ijm", path+",mask_myo_trabecular.tif,mask_myo_trabecular_base.tif-mask_myo_trabecular_middle.tif,mask_myo_trabecular_apex.tif,reverse");
@@ -330,6 +333,9 @@ for (i=0; i<runOn.length; i++) {
 					runMacro("pk/into_layers.ijm", path+",label_endo.tif,mask_myo_compact.tif,0.95,endo_base-endo_middle-endo_apex");
 					runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_endo_base.tif,endo_base,endo_middle_apex");
 					runMacro("pk/segment.ijm", path+",label_endo_middle_apex.tif,list_endo_middle_apex.zip,mask_endo_middle.tif,endo_middle,endo_apex");
+					File.delete(path+"labels/label_endo_middle_apex.tif");
+					File.delete(path+"zips/list_endo_middle_apex.zip");
+					close("Log");
 					runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo_base.tif,mask_endo_base.tif,normal");
 					runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo_middle.tif,mask_endo_middle.tif,normal");
 					runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_endo_base.tif-mask_endo_middle.tif,mask_endo_apex.tif,reverse");
@@ -337,14 +343,16 @@ for (i=0; i<runOn.length; i++) {
 			}
 		}
 		if (perform_thresholding) {
-			runMacro("pk/map_activities.ijm", path+",intensity.tif,"+threshold_values+","+threshold_colors);
+			f = File.open(path+"counts.csv");
+			counts = runMacro("pk/map_activities.ijm", path+",intensity.tif,"+threshold_values+","+threshold_colors);
+			print(f, counts);
+			File.close(f);
+		}
+		if (get_areas) {
+			runMacro("pk/get_areas.ijm", path);
 		}
 		if (generate_qc) {
 			runMacro("pk/quality_check.ijm", path);
-		}
-
-		if (save_output) {
-			runMacro("pk/get_areas.ijm", path);
 		}
 
 	}
