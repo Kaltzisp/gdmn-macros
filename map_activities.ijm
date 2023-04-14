@@ -1,62 +1,80 @@
 // Getting input.
-setOption("ExpandableArrays", true);
+setOption("ExpandableArrays", false);
 input = split(getArgument(), ",");
 path = input[0];
-intensity = input[1];
+intensityImage = input[1];
 
-// Getting colors and layers
-layers = split(input[2], "-");
+// Creating output string.
+var output = "";
+
+// Getting layer colors and thresholds.
+thresholds = split("0-"+input[2], "-");
 colors = split(input[3], "-");
 
-// Getting thresholds.
-thresholds = newArray(layers.length+1);
-thresholds[0] = 0;
+// Converting thresholds to pixel values.
 for (i=1; i<thresholds.length; i++) {
-	thresholds[i] = parseFloat(layers[i-1])*255*0.01;
+	thresholds[i] = parseFloat(thresholds[i])*255*0.01;
 }
 
-// Preparing output array.
-output = newArray();
-
 // Opening files and getting variables.
-open(path+"channels/"+intensity);
-files = getFileList(path+"labels/");
-for (i = 0; i < files.length; i++) {
+open(path+"channels/"+intensityImage);
+labels = getFileList(path+"labels/");
+
+// Creating marker images.
+for (i = 0; i<labels.length; i++) {
+
+	// Duplicate intensity image.
 	run("Duplicate...", "duplicate");
-	rename("int");
-	file = replace(files[i], "label_", "");
-	file = replace(file, ".tif", "");
-	roiManager("open", path+"zips/list_"+file+".zip");
+	rename("intensityImage");
+
+	// Getting file name and zip.
+	fileName = replace(labels[i], "(label_|\.tif)", "");
+	roiManager("open", path+"zips/list_"+fileName+".zip");
+
+	// Counting objects and creating activity array.
 	n = roiManager("count");
-	fileOutput = newArray(n);
 	activity = newArray(n);
 	Array.fill(activity, 0);
-	selectWindow("int");
-	for (j = 0; j < n; j++) {
-	    roiManager('select', j);
-	    int = getValue("Mean");
+
+	// Creating counts array.
+	counts = newArray(thresholds.length);
+	Array.fill(counts, 0);
+
+	// Checking intensities.
+	selectWindow("intensityImage");
+	for (j=0; j<n; j++) {
+	    roiManager("select", j);
+	    intensity = getValue("Mean");
 	    k = thresholds.length - 1;
-	    while(thresholds[k] > int) {
+	    while(thresholds[k] > intensity) {
 	    	k = k - 1;
 	    }
 	    activity[j] = k;
-	    fileOutput[j] = k;
+	    counts[k] += 1;
 	}
-	run("RGB Color");
+
+	// Creating marker image.
 	run("Select All");
 	run("Clear");
-	for (j = 0; j < n; j++) {
-	    roiManager('select', j);
+	run("RGB Color");
+	for (j=0; j<n; j++) {
+	    roiManager("select", j);
 	    setColor(colors[activity[j]]);
 	    fill();
 	}
-	save(path+"marker/marker_"+file+".tif");
+	
+	// Getting total cells and appending to string.
+	total = 0;
+	for (j=0; j<counts.length; j++) {
+		total += counts[j];
+	}
+	output = output + String.join(counts) + "," + total + ",";
+	
+	// Saving marker image.
+	save(path+"marker/marker_"+fileName+".tif");
 	close("ROI Manager");
 	close();
-	output[output.length] = "-";
-	output = Array.concat(output, fileOutput);
 }
 
-close(intensity);
-
-// return String.join(output, ",");
+close(intensityImage);
+return output;
