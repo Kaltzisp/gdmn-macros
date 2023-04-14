@@ -46,7 +46,7 @@ for (i = 0; i<labels.length; i++) {
 	    roiManager("select", j);
 	    intensity = getValue("Mean");
 	    k = thresholds.length - 1;
-	    while(thresholds[k] > intensity) {
+	    while(parseFloat(thresholds[k]) > parseFloat(intensity)) {
 	    	k = k - 1;
 	    }
 	    activity[j] = k;
