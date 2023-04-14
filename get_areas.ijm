@@ -3,8 +3,8 @@ input = getArgument();
 input = split(input, ",");
 path = input[0];
 
-// Deleting prefile.
-// File.delete(path+"areas.csv");
+// Opening write file.
+f = File.open(path+"areas.csv");
 
 areaString = "";
 
@@ -19,4 +19,5 @@ for (i=0; i<masks.length; i++) {
 }
 
 // Saving file.
-File.append(areaString, path+"areas.csv");
+print(f, areaString);
+File.close(f);
