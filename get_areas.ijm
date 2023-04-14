@@ -12,6 +12,13 @@ areaString = "";
 masks = getFileList(path+"masks/") ;
 for (i=0; i<masks.length; i++) {
     open(path+"masks/"+masks[i]);
+	// Getting total area.
+	if (i==0) {
+		run("Select All");
+    	area = toString(getValue("Area"));
+    	areaString = areaString + area + ",";
+    	run("Select None");
+	}
     run("Create Selection");
     area = toString(getValue("Area"));
     areaString = areaString + area + ",";
