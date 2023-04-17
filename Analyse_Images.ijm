@@ -6,9 +6,14 @@ blue = "#0000ff";
 
 // Checking previous path.
 var defaultPath = "copy_path_here";
+var defaultPattern = "roi.tif";
+var defaultChannels = "myo-endo-marker-nuclei";
 tmp = getDirectory("temp");
-if (File.exists(tmp+"FIJI_PATH")) {
-	defaultPath = File.openAsRawString(tmp+"FIJI_PATH");
+if (File.exists(tmp+"FIJI_DEFAULTS")) {
+	defaults = split(File.openAsRawString(tmp+"FIJI_DEFAULTS"), ",");
+	defaultPath = defaults[0];
+	defaultPattern = defaults[1];
+	defaultChannels = defaults[2];
 }
 
 // Dialog info.
@@ -21,7 +26,7 @@ Dialog.addMessage("Created by Peter Kaltzis", 11, "#000055");
 Dialog.addCheckbox("Browse for folder...", false);
 Dialog.addString("Path to images:", defaultPath, 100);
 
-Dialog.addString("Image file pattern:", "roi.tif");
+Dialog.addString("Image file pattern:", defaultPattern);
 Dialog.addToSameRow();
 Dialog.addMessage("The asterisk * is a wildcard - e.g. Image*roi.tif will match Image_01_roi.tif, Image_02_roi.tif, etc.", 12, blue);
 
@@ -36,7 +41,7 @@ Dialog.addMessage("Select all methods to apply:", 15, red);
 Dialog.addCheckbox("Select ROIs", false);
 Dialog.addCheckbox("Split channels", false);
 Dialog.addToSameRow();
-Dialog.addString("Channel order:", "myo-marker-endo-nuclei", 20);
+Dialog.addString("Channel order:", defaultChannels, 20);
 
 // Mask creation.
 Dialog.addCheckbox("Create myo masks", false);
@@ -146,9 +151,6 @@ if (browse) {
 	path = getDirectory("Select a directory.");
 }
 
-// Saving path.
-File.saveString(path, tmp+"FIJI_PATH");
-
 // Checking logs directory.
 runMacro("pk/make_folders.ijm", path+",logs");
 getDateAndTime(y,m,d,D,H,M,S,MS);
@@ -182,7 +184,6 @@ perform_thresholding = Dialog.getCheckbox(); print(f, "perform_thresholding=" + 
 get_areas = Dialog.getCheckbox(); print(f, "get_areas=" + get_areas);
 generate_qc = Dialog.getCheckbox(); print(f, "generate_qc=" + generate_qc);
 
-
 pattern = Dialog.getString(); print(f, "pattern=" + pattern);
 channels = Dialog.getString(); print(f, "channels=" + channels);
 optional_mask = Dialog.getString(); print(f, "optional_mask=" + optional_mask);
@@ -209,6 +210,13 @@ num_sublayers = Dialog.getNumber(); print(f, "num_sublayers=" + num_sublayers);
 
 // Closing logfile.
 File.close(f);
+
+// Saving default values.
+defaultString = "";
+defaultString = defaultString + path + ",";
+defaultString = defaultString + pattern + ",";
+defaultString = defaultString + channels + ",";
+File.saveString(defaultString, tmp+"FIJI_DEFAULTS");
 
 // Confirming analysis.
 pattern = replace(pattern, "*", ".*");
