@@ -41,6 +41,8 @@ Dialog.addMessage("Select all methods to apply:", 15, red);
 Dialog.addCheckbox("Select ROIs", false);
 Dialog.addCheckbox("Split channels", false);
 Dialog.addToSameRow();
+Dialog.addNumber("Crosstalk suppression:", 1, 2, 6, "");
+Dialog.addToSameRow();
 Dialog.addString("Channel order:", defaultChannels, 20);
 
 // Mask creation.
@@ -192,6 +194,7 @@ manual_mask_template = Dialog.getString(); print(f, "manual_mask_template=" + ma
 threshold_values = Dialog.getString(); print(f, "threshold_values=" + threshold_values);
 threshold_colors = Dialog.getString(); print(f, "threshold_colors=" + threshold_colors);
 
+myo_supp = Dialog.getNumber(); print(f, "myo_supp=" + myo_supp);
 myo_amp = Dialog.getNumber(); print(f, "myo_amp=" + myo_amp);
 myo_avg = Dialog.getNumber(); print(f, "myo_avg=" + myo_avg);
 myo_smooth = Dialog.getNumber(); print(f, "myo_smooth=" + myo_smooth);
@@ -273,7 +276,7 @@ for (i=0; i<runOn.length; i++) {
 			runMacro("pk/select_rois.ijm", path+","+fileName);
 		}
 		if (split_channels) {
-			runMacro("pk/clean_channels.ijm", path+",roi,"+channels);
+			runMacro("pk/clean_channels.ijm", path+","+myo_supp+",roi,"+channels);
 		}
 		if (create_myo_masks) {
 			runMacro("pk/create_masks.ijm", path+",myo,"+myo_amp+","+myo_avg+","+myo_smooth+",myo");
@@ -299,7 +302,7 @@ for (i=0; i<runOn.length; i++) {
 			runMacro("pk/crop_mask.ijm", path+",mask_myo.tif,mask_myo_compact.tif,mask_myo_trabecular.tif,reverse");
 		}
 		if (run_stardist) {
-			var nuclei_file = "nuclei";
+			var nuclei_file = "nuclei.tif";
 			if (File.exists(path+"channels/nuclei_clean.tif")) {
 				nuclei_file = "nuclei_clean.tif";
 			}

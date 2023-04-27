@@ -1,8 +1,9 @@
 // Getting input.
 input = split(getArgument(), ",");
 path = input[0];
-roi = input[1];
-channels = split(input[2], "-");
+crosstalk_suppression = input[1];
+roi = input[2];
+channels = split(input[3], "-");
 
 // Splitting channels.
 open(path+roi+".tif");
@@ -41,6 +42,8 @@ save(path+"channels/nuclei.tif");
 close("nuclei_clean");
 
 // Cleaning myo and endo channels.
+selectWindow("endo");
+run("Multiply...", "value="+crosstalk_suppression);
 imageCalculator("Subtract create", "myo", "endo");
 save(path+"channels/myo.tif");
 close("Result of myo");
