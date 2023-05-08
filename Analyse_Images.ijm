@@ -386,5 +386,5 @@ for (i=0; i<runOn.length; i++) {
 
 // Saving output.
 if (collate && output.length > 0) {
-	File.saveString(output, baseDir+"quantifications.csv");
+	File.saveString(headers + output, baseDir+"quantifications.csv");
 }
