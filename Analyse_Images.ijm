@@ -134,8 +134,10 @@ Dialog.addString("Intensity threshold(s):", 30);
 Dialog.addToSameRow();
 Dialog.addToSameRow();
 Dialog.addString("%         Threshold colors:", "blue-red");
-Dialog.addCheckbox("Calculate area quantifications", false);
+Dialog.addCheckbox("Calculate areas", false);
 Dialog.addCheckbox("Generate QC files", false);
+Dialog.addCheckbox("Collate Quantifications", false);
+
 
 // Showing dialog.
 Dialog.show();
@@ -185,6 +187,8 @@ endocardial_sublayers = Dialog.getCheckbox(); print(f, "endocardial_sublayers=" 
 perform_thresholding = Dialog.getCheckbox(); print(f, "perform_thresholding=" + perform_thresholding);
 get_areas = Dialog.getCheckbox(); print(f, "get_areas=" + get_areas);
 generate_qc = Dialog.getCheckbox(); print(f, "generate_qc=" + generate_qc);
+collate = Dialog.getCheckbox(); print(f, "collate=" + collate);
+
 
 pattern = Dialog.getString(); print(f, "pattern=" + pattern);
 channels = Dialog.getString(); print(f, "channels=" + channels);
@@ -245,6 +249,11 @@ Dialog.addMessage(pattern, 12, blue);
 Dialog.addMessage("The macro has identified: "+runOn.length+" images which match these criteria", 20, green);
 Dialog.addMessage("WARNING: IF YOU PROCEED, PREVIOUS QUANTIFICATIONS AND LABELS WILL BE OVERWRITTEN.", 12, red);
 Dialog.show();
+
+// Preparing output.
+baseDir = path;
+var headers = "";
+var output = "";
 
 // Running macro iteratively.
 for (i=0; i<runOn.length; i++) {
@@ -366,7 +375,16 @@ for (i=0; i<runOn.length; i++) {
 		if (generate_qc) {
 			runMacro("pk/quality_check.ijm", path);
 		}
-
+		if (collate) {
+			if (i==0) {
+				headers = runMacro("pk/collate.ijm", path+",headers,counts-areas");
+			}
+			output += runMacro("pk/collate.ijm", path+",entries,counts-areas");
+		}
 	}
 }
 
+// Saving output.
+if (collate && output.length > 0) {
+	File.saveString(output, baseDir+"quantifications.csv");
+}
