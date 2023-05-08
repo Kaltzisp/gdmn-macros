@@ -285,6 +285,7 @@ for (i=0; i<runOn.length; i++) {
 		if (create_endo_masks) {
 			runMacro("pk/create_masks.ijm", path+",endo,"+endo_amp+","+endo_avg+","+endo_smooth+",endo");
 			runMacro("pk/create_masks.ijm", path+",endo,"+(endo_amp/2)+","+(endo_avg/2)+","+(endo_smooth/2)+",endo_low");
+			runMacro("pk/crop_mask.ijm", path+",mask_endo.tif,mask_myo.tif,mask_endo.tif,reverse");
 		}
 		if (create_optional_mask) {
 			runMacro("pk/create_masks.ijm", path+","+optional_mask+","+optional_amp+","+optional_avg+","+optional_smooth+","+optional_mask);

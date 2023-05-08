@@ -43,10 +43,12 @@ close("nuclei_clean");
 
 // Cleaning myo and endo channels.
 selectWindow("endo");
+run("Duplicate...", "duplicate");
 run("Multiply...", "value="+crosstalk_suppression);
-imageCalculator("Subtract create", "myo", "endo");
+imageCalculator("Subtract create", "myo", "endo-1");
 save(path+"channels/myo.tif");
 close("Result of myo");
+close("endo-1");
 imageCalculator("Subtract create", "endo", "myo");
 save(path+"channels/endo.tif");
 close("Result of endo");
