@@ -271,6 +271,11 @@ for (i=0; i<runOn.length; i++) {
 	} else if (OS == "Mac OS X") {
 		path = "/" + path;
 	}
+
+	// Path sanitization for Lab Workstation.
+	if(startsWith(path, "ad.monash.edu")) {
+		path = "\\\\" + path;
+	}
 	
 	if (folder_hierarchy) {
 		// Create folder hierarchy.
