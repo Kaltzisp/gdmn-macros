@@ -47,7 +47,12 @@ if (File.exists(path+"marker/marker_roi.tif")) {
 	run("Restore Selection");
 	run("Draw");
 	run("Select None");
-	open(path+"channels/nuclei_clean.tif");
+	var nuclei_file = "nuclei.tif";
+	if (File.exists(path+"channels/nuclei_clean.tif")) {
+		nuclei_file = "nuclei_clean.tif";
+	}
+	open(path+"channels/"+nuclei_file);
+	rename("nuclei");
 	run("RGB Color");
 	run("Restore Selection");
 	run("Draw");
@@ -63,7 +68,7 @@ if (File.exists(path+"marker/marker_roi.tif")) {
 	run("Restore Selection");
 	run("Draw");
 	run("Select None");
-	selectWindow("nuclei_clean.tif");
+	selectWindow("nuclei");
 	run("Restore Selection");
 	run("Draw");
 	run("Select None");
@@ -75,9 +80,9 @@ if (File.exists(path+"marker/marker_roi.tif")) {
 	selectWindow("intensity.tif");
 	save(path+"QC_intensity.tif");
 	close("intensity.tif");
-	selectWindow("nuclei_clean.tif");
+	selectWindow("nuclei");
 	save(path+"QC_nuclei.tif");
-	close("nuclei_clean.tif");
+	close("nuclei");
 	selectWindow("marker_roi.tif");
 	save(path+"QC_marker.tif");
 	close("marker_roi.tif");
