@@ -11,7 +11,7 @@ if (template == "roi") {
 	open(path+"masks/mask_"+template+".tif");
 }
 
-run("Select None");
+// run("Select None");
 setTool(2);
 waitForUser("Select the area of the "+mask+" mask, and then hit OK.");
 run("Create Mask");
