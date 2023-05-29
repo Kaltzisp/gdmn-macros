@@ -27,6 +27,7 @@ for (i=1; i<masks.length; i++) {
 	fill();
 	close("mask_"+masks[i]+".tif");
 }
+run("Make Binary");
 run("Create Selection");
 run("Enlarge...", "enlarge="+expansion);
 
