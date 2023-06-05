@@ -68,9 +68,12 @@ for (j = 0; j < 2; j++) {
 	} else {
 		output = input[4];
 	}
-	save(path+"labels/label_"+output+".tif");
+	// Only save if there is data to save.
+	if (roiManager("count") > 0) {
+		save(path+"labels/label_"+output+".tif");
+		roiManager("save", path+"zips/list_"+output+".zip");
+	}
 	close();
-	roiManager("save", path+"zips/list_"+output+".zip");
 	selectWindow("ROI Manager");
 	run("Close");
 }
