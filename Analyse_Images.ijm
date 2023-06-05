@@ -1,3 +1,6 @@
+// Quantifications should allow for medium activity
+// ECM Volume. See if I can classify this.
+
 // Color shortcuts.
 black = "#000000";
 red = "#ff0000";
@@ -324,7 +327,14 @@ for (i=0; i<runOn.length; i++) {
 			runMacro("pk/stardist.ijm", path+","+nuclei_file+","+percentile_low+","+percentile_high+","+probability+","+overlap+","+min_area+",roi");
 		}
 		if (segment_tissues) {
-			runMacro("pk/segment.ijm", path+",label_roi.tif,list_roi.zip,mask_myo.tif,myo,endo");
+			runMacro("pk/segment.ijm", path+",label_roi.tif,list_roi.zip,mask_myo.tif,myo,endo_coronaries");
+			open(path+"masks/mask_myo_compact.tif");
+			run("Select None");
+			run("Fill Holes");
+			run("Create Selection");
+			save(path+"masks/mask_myo_compact_filled.tif");
+			close("mask_myo_compact.tif");
+			runMacro("pk/segment.ijm", path+",label_endo_coronaries.tif,list_endo_coronaries.zip,mask_myo_compact_filled.tif,coronaries,endo");
 		}
 		if (segment_myo) {
 			runMacro("pk/segment.ijm", path+",label_myo.tif,list_myo.zip,mask_myo_compact.tif,myo_compact,myo_trabecular");
