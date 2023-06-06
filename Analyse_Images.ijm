@@ -86,9 +86,7 @@ Dialog.addCheckbox("Draw custom mask", false);
 Dialog.addToSameRow();
 Dialog.addString("Mask name:", "myo_compact");
 Dialog.addToSameRow();
-Dialog.addString("Template:", "myo");
-Dialog.addToSameRow();
-Dialog.addMessage("Manually select a region. Template can be roi/myo/endo.", 12, blue);
+Dialog.addChoice("Template:", newArray("roi", "mask_myo", "mask_endo", "label_endo"), "mask_myo");
 Dialog.addCheckbox("Get trabecular mask from compact mask", false);
 
 // Linebreak.
@@ -197,7 +195,7 @@ pattern = Dialog.getString(); print(f, "pattern=" + pattern);
 channels = Dialog.getString(); print(f, "channels=" + channels);
 optional_mask = Dialog.getString(); print(f, "optional_mask=" + optional_mask);
 manual_mask_name = Dialog.getString(); print(f, "manual_mask_name=" + manual_mask_name);
-manual_mask_template = Dialog.getString(); print(f, "manual_mask_template=" + manual_mask_template);
+manual_mask_template = Dialog.getChoice(); print(f, "manual_mask_template=" + manual_mask_template);
 threshold_values = Dialog.getString(); print(f, "threshold_values=" + threshold_values);
 threshold_colors = Dialog.getString(); print(f, "threshold_colors=" + threshold_colors);
 
@@ -327,7 +325,7 @@ for (i=0; i<runOn.length; i++) {
 			runMacro("pk/stardist.ijm", path+","+nuclei_file+","+percentile_low+","+percentile_high+","+probability+","+overlap+","+min_area+",roi");
 		}
 		if (segment_tissues) {
-			runMacro("pk/segment.ijm", path+",label_roi.tif,list_roi.zip,mask_myo.tif,myo,endo_coronaries");
+			runMacro("pk/segment.ijm", path+",label_roi.tif,list_roi.zip,mask_myo.tif,myo,endo");
 			if (File.exists(path+"masks/mask_myo_compact.tif")) {
 				open(path+"masks/mask_myo_compact.tif");
 				run("Select None");
@@ -335,9 +333,13 @@ for (i=0; i<runOn.length; i++) {
 				run("Create Selection");
 				save(path+"masks/mask_myo_compact_filled.tif");
 				close("mask_myo_compact.tif");
-				runMacro("pk/segment.ijm", path+",label_endo_coronaries.tif,list_endo_coronaries.zip,mask_myo_compact_filled.tif,coronaries,endo");
+				runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_myo_compact_filled.tif,coronaries,endo");
+			}
+			if (File.exists(path+"masks/mask_epi.tif")) {
+				runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_epi.tif,epi,endo");
 			}
 		}
+		
 		if (segment_myo) {
 			runMacro("pk/segment.ijm", path+",label_myo.tif,list_myo.zip,mask_myo_compact.tif,myo_compact,myo_trabecular");
 		}
