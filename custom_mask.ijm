@@ -6,9 +6,11 @@ template = input[2];
 mask = input[1];
 
 if (template == "roi") {
-	open(path+template+".tif");
+	open(path+"roi.tif");
+} else if (template=="label_endo") {
+	open(path+"labels/label_endo.tif");
 } else {
-	open(path+"masks/mask_"+template+".tif");
+	open(path+"masks/"+template+".tif");
 }
 
 // run("Select None");
