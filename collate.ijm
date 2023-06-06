@@ -12,6 +12,8 @@ if (type == "headers") {
 		f = getFileList(path+"marker/");
 		files = Array.concat(files, f);
 	}
+	// Total image area measure.
+	files = Array.concat(files, newArray("total_area"));
 	if (File.exists(path+"masks/")) {
 		f = getFileList(path+"masks/");
 		files = Array.concat(files, f);
@@ -31,11 +33,11 @@ if (type == "headers") {
 			headers[n] = "negative_"+title;
 			headers[n+1] = "active_"+title;
 			headers[n+2] = "total_"+title;
-		}
-		if (startsWith(file, "mask_")) {
+		} else if (startsWith(file, "mask_")) {
 			headers[n] = "area_"+title;
+		} else if (file == "total_area") {
+			headers[n] = file;
 		}
-		
 	}
 	return String.join(headers, ",") + "\n";
 	
