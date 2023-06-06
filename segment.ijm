@@ -21,6 +21,9 @@ label = getTitle();
 open(path+"masks/"+input[3]);
 mask = getTitle();
 
+// Creating temp ROIs file.
+File.copy(path+"zips/"+input[2], path+"zips/tmp.zip");
+
 // Looping over inside and outside.
 for (j = 0; j < 2; j++) {
 	// Duplicating label.
@@ -30,7 +33,7 @@ for (j = 0; j < 2; j++) {
 	active = getTitle();
 
 	// Opening roi zip.
-	open(path+"zips/"+input[2]);
+	open(path+"zips/tmp.zip");
 	
 	// Filling in first roi (usually black).
 	roiManager('select', 0);
@@ -81,3 +84,7 @@ for (j = 0; j < 2; j++) {
 // Closing files.
 close(label);
 close(mask);
+
+// Deleting temp ROIs file.
+File.delete(path+"zips/tmp.zip");
+close("Log");
