@@ -109,6 +109,9 @@ Dialog.addNumber("Minimum area", 30, 2, 5, "um");
 Dialog.addCheckbox("Myo/Endo classification", false);
 Dialog.addToSameRow();
 Dialog.addMessage("Segments nuclei into separate myocardial and endocardial labels.", 12, blue);
+Dialog.addCheckbox("Endo/Epi classification", false);
+Dialog.addToSameRow();
+Dialog.addMessage("Requires a manually drawn epi mask.", 12, blue);
 Dialog.addCheckbox("Compact/Trabecular classification", false);
 Dialog.addToSameRow();
 Dialog.addMessage("Further segments myocardial nuclei into compact and trabecular labels.", 12, blue);
@@ -181,6 +184,7 @@ draw_custom_mask = Dialog.getCheckbox(); print(f, "draw_custom_mask=" + draw_cus
 compute_trabecular_mask = Dialog.getCheckbox(); print(f, "compute_trabecular_mask=" + compute_trabecular_mask);
 run_stardist = Dialog.getCheckbox(); print(f, "run_stardist=" + run_stardist);
 segment_tissues = Dialog.getCheckbox(); print(f, "segment_tissues=" + segment_tissues);
+segment_epi = Dialog.getCheckbox(); print(f, "segment_epi=" + segment_epi);
 segment_myo = Dialog.getCheckbox(); print(f, "segment_myo=" + segment_myo);
 create_sublayers = Dialog.getCheckbox(); print(f, "create_sublayers=" + create_sublayers);
 trabecular_sublayers = Dialog.getCheckbox(); print(f, "trabecular_sublayers=" + trabecular_sublayers);
@@ -335,9 +339,9 @@ for (i=0; i<runOn.length; i++) {
 				close("mask_myo_compact.tif");
 				runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_myo_compact_filled.tif,coronaries,endo");
 			}
-			if (File.exists(path+"masks/mask_epi.tif")) {
-				runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_epi.tif,epi,endo");
-			}
+		}
+		if (segment_epi && File.exists(path+"masks/mask_epi.tif")) {
+			runMacro("pk/segment.ijm", path+",label_endo.tif,list_endo.zip,mask_epi.tif,epi,endo");
 		}
 		
 		if (segment_myo) {
