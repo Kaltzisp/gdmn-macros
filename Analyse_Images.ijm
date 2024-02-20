@@ -1,6 +1,6 @@
 // Quantifications should allow for medium activity
 // ECM Volume. See if I can classify this.
-
+setOption("BlackBackground", true);
 // Color shortcuts.
 black = "#000000";
 red = "#ff0000";
